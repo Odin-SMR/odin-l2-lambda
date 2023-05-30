@@ -16,23 +16,33 @@ projects = [
         "URLS": {
             "URL-project": "http://malachite.rss.chalmers.se/rest_api/v5/level2/meso21/",  # noqa: E501
         },
-        "FreqMode": [21],
-        "InvMode": "meso",
+        "FreqModes": {
+            21: "qsmr_meso_21_MESO21ALL20191110_191110",
+        },
     },
     {
         "Name": "ALL-Strat-v3.0.0",
         "URLS": {
             "URL-project": "http://malachite.rss.chalmers.se/rest_api/v5/level2/ALL-Strat-v3.0.0/",  # noqa: E501
         },
-        "FreqMode": [1, 2, 8],
-        "InvMode": "stnd",
+        "FreqModes": {
+            1: "qsmr_stnd_1_ALLSTND1_190830",
+            2: "qsmr_stnd_2_Stnd2IncreasedTgridRes_191129",
+            8: "qsmr_stnd_8_ALLSTND8_190830",
+        },
     },
     {
         "Name": "ALL-Meso-v3.0.0",
         "URLS": {
             "URL-project": "http://malachite.rss.chalmers.se/rest_api/v5/level2/ALL-Meso-v3.0.0/",  # noqa: E501
         },
-        "FreqMode": [13, 14, 19, 22, 24],
+        "FreqModes": {
+            13: "qsmr_stnd_1_ALLSTND1_190830",
+            14: None,
+            19: "qsmr_meso_19_MESO19SB110ALL19lowTunc2_200306",
+            22: None,
+            24: None,
+        },
         "InvMode": "meso",
     },
 ]
