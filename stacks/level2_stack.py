@@ -12,14 +12,16 @@ from aws_cdk.aws_sqs import DeadLetterQueue, Queue
 from constructs import Construct
 
 DOCKER_IMAGE = """
-FROM odinsmr/u-jobs:qsmr_{invmode}_{freqmode}_{project}
 
 FROM public.ecr.aws/lambda/python:3.9
+# Copy Matlab runtime and QSMR
+COPY --from=odinsmr/u-jobs:qsmr_{invmode}_{freqmode}_{project} /opt/matlab /opt/matlab
+COPY --from=odinsmr/u-jobs:qsmr_{invmode}_{freqmode}_{project} /qsmr /qsmr
 
 # Copy function code
 COPY ./level2/handlers/level2.py /var/task
 
-# Set the CMD to your handler
+# Set the CMD to handler
 CMD [ "level2.lambda_handler" ]
 """
 
