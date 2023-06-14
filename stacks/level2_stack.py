@@ -1,16 +1,18 @@
 from typing import cast, Any
 from warnings import warn
 
-from aws_cdk import Duration, Stack, RemovalPolicy
-from aws_cdk.aws_iam import Effect, PolicyStatement
+from aws_cdk import Duration, Stack
 from aws_cdk.aws_lambda import (
     Architecture,
     DockerImageCode,
     DockerImageFunction,
 )
 from aws_cdk.aws_lambda_event_sources import SqsEventSource
-from aws_cdk.aws_sqs import DeadLetterQueue, Queue
+from aws_cdk.aws_sqs import Queue
 from constructs import Construct
+
+from .level2_jobs_stack import QUEUE_NAME
+
 
 DOCKER_IMAGE = """
 FROM public.ecr.aws/lambda/python:3.9
@@ -36,24 +38,22 @@ class Level2Stack(Stack):
         id: str,
         project_settings: dict[str, Any],
         docker_dir: str,
-        worker_user: str,
-        worker_key_ssm_name: str,
         lambda_timeout: Duration = Duration.seconds(900),
-        queue_retention_period: Duration = Duration.days(14),
         **kwargs
     ) -> None:
         super().__init__(scope, id, **kwargs)
         lambda_name = "OdinSMRLevel2Lambda-{project}-{freqmode}"
-        queue_name = "OdinSMRLevel2Queue-{project}-{freqmode}"
         docker_name = "Dockerfile-{tag}"
         clean_project = cast(
             str,
             project_settings["Name"],
         ).replace(".", "-")
 
-        for fm, tag in project_settings["FreqModes"].items():
+        for freqmode, tag in project_settings["FreqModes"].items():
             if tag is None:
-                warn(f"No tag for {project_settings['Name']} for FM {fm}.")
+                warn(
+                    f"No tag for {project_settings['Name']} for FM {freqmode}."
+                )
                 continue
             docker_file = docker_dir + "/" + docker_name.format(tag=tag)
             with open(docker_file, "w") as fp:
@@ -62,7 +62,7 @@ class Level2Stack(Stack):
                 self,
                 lambda_name.format(
                     project=clean_project,
-                    freqmode=fm,
+                    freqmode=freqmode,
                 ),
                 code=DockerImageCode.from_image_asset(
                     ".",
@@ -70,41 +70,20 @@ class Level2Stack(Stack):
                 ),
                 timeout=lambda_timeout,
                 architecture=Architecture.X86_64,
-                memory_size=4096,
-                environment={
-                    "ODIN_API_USER": worker_user,
-                    "ODIN_API_KEY_SSM_NAME": worker_key_ssm_name,
-                },
+                memory_size=6144,
             )
 
-            event_queue = Queue(
+            queue_name = QUEUE_NAME.format(
+                project=clean_project,
+                freqmode=freqmode,
+            )
+            event_queue = Queue.from_queue_arn(
                 self,
-                queue_name.format(
-                    project=clean_project,
-                    freqmode=fm,
-                ),
-                retention_period=queue_retention_period,
-                visibility_timeout=lambda_timeout,
-                removal_policy=RemovalPolicy.RETAIN,
-                dead_letter_queue=DeadLetterQueue(
-                    max_receive_count=1,
-                    queue=Queue(
-                        self,
-                        "Failed" + queue_name.format(
-                            project=clean_project,
-                            freqmode=fm,
-                        ),
-                        retention_period=queue_retention_period,
-                    ),
-                ),
+                queue_name,
+                project_settings["JobQueues"][freqmode]["ARN"]
             )
 
             level2_lambda.add_event_source(SqsEventSource(
                 event_queue,
                 batch_size=1,
-            ))
-            level2_lambda.add_to_role_policy(PolicyStatement(
-                effect=Effect.ALLOW,
-                actions=["ssm:GetParameter"],
-                resources=[f"arn:aws:ssm:*:*:parameter{worker_key_ssm_name}"]
             ))
