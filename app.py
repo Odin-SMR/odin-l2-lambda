@@ -8,7 +8,7 @@ from stacks.level2_jobs_stack import Level2JobsStack
 from stacks.level2_stack import Level2Stack
 
 app = App()
-ODIN_API_ROOT = "http://malachite.rss.chalmers.se/rest_api"
+ODIN_API_ROOT = "https://odin-smr.org/rest_api"
 ODIN_API_KEY_NAME = "/odin-api/worker-key"
 
 # This format mostly follows that of `v5/level2/projects/`, but with the
