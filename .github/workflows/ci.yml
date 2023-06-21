@@ -1,4 +1,4 @@
-name: L0-fetcher CI
+name: Odin SMR L2 processing CI
 
 on: [push]
 

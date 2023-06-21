@@ -1,4 +1,4 @@
-name: L0-fetcher CD
+name: Odin SMR L2 processing CD
 
 on:
   release:
