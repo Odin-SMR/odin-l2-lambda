@@ -6,8 +6,7 @@ from aws_cdk.aws_events import Rule, Schedule
 from aws_cdk.aws_events_targets import LambdaFunction
 from aws_cdk.aws_dynamodb import Table, Attribute, AttributeType
 from aws_cdk.aws_iam import Effect, PolicyStatement
-from aws_cdk.aws_lambda import Runtime
-from aws_cdk.aws_lambda_python_alpha import PythonFunction
+from aws_cdk.aws_lambda import Function, InlineCode, Runtime
 from aws_cdk.aws_sqs import Queue, DeadLetterQueue
 from constructs import Construct
 
@@ -33,12 +32,11 @@ class Level2JobsStack(Stack):
         lambda_name = "OdinSMRLevel2JobsLambda"
         processing_table_name = "OdinSMRLevel2ProcessingTable"
 
-        level2_jobs_lambda = PythonFunction(
+        level2_jobs_lambda = Function(
             self,
             lambda_name,
-            entry="level2",
-            handler="handler",
-            index="handlers/level2_jobs.py",
+            code=InlineCode.from_asset("./level2/handlers"),
+            handler="level2_jobs.handler",
             runtime=Runtime.PYTHON_3_9,
             timeout=lambda_timeout,
             environment={
