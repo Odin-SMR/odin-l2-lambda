@@ -1,0 +1,5 @@
+black
+boto3-stubs[essential, stepfunctions, ssm, ecr, s3]
+mypy
+pytest
+tox
