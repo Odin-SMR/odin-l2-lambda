@@ -95,7 +95,7 @@ class EcsStepFunctionStack(Stack):
                 queue_name=f"QSMRQueue-{tag}",
             )
 
-            service = QueueProcessingFargateService(
+            QueueProcessingFargateService(
                 self,
                 f"QSMRService{tag}",
                 cluster=cluster,
@@ -106,11 +106,16 @@ class EcsStepFunctionStack(Stack):
                     log_group=log_group,
                 ),
                 enable_logging=True,
+                capacity_provider_strategies=[
+                    ecs.CapacityProviderStrategy(
+                        capacity_provider="FARGATE_SPOT", weight=1, base=0
+                    )
+                ],
                 family=f"QSMR-{tag}",
                 cpu=2048,
-                memory_limit_mib=8192,
+                memory_limit_mib=4096,
                 min_scaling_capacity=0,
-                max_scaling_capacity=5,
+                max_scaling_capacity=10,
                 queue=queue,
                 service_name=f"QSMR-{tag}",
             )
