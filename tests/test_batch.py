@@ -2,7 +2,6 @@ from level2.handlers.batch import QsmrBatch, Batch
 import pytest
 
 
-
 @pytest.fixture
 def obj():
     data = [
@@ -36,9 +35,7 @@ class TestBatch:
         assert batch.make_batch() == {}
 
     def test_batch_url(self):
-        batch = QsmrBatch.from_python(
-            [dict(backend="AC1", freqmode=24, scanid=1001)]
-        )
+        batch = QsmrBatch.from_python([dict(backend="AC1", freqmode=24, scanid=1001)])
         jobs = batch.make_batch()
         assert jobs["meso24"][0]["source"] == (
             "https://odin-smr.org/rest_api/v5/level1/24/1001/Log/"
