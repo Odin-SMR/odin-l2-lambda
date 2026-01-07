@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   api:
-    runs-on: ubuntu-24-04
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout repo
         uses: actions/checkout@v6
