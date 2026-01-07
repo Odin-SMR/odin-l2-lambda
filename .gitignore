@@ -134,3 +134,6 @@ cdk.json
 
 # GIT
 .orig
+
+# Ruff
+.ruff_cache/

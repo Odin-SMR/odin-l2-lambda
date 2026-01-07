@@ -1,9 +1,10 @@
+from typing import Any
 from level2.handlers.batch import QsmrBatch, Batch
 import pytest
 
 
 @pytest.fixture
-def obj():
+def obj() -> list[dict[str, Any]]:
     data = [
         dict(backend="AC2", freqmode=1, scanid="1234", extra="faulty"),
         dict(backend="AC1", freqmode=2, scanid=1235),
@@ -12,17 +13,17 @@ def obj():
 
 
 class TestBatch:
-    def test_convert_to_int(self, obj):
+    def test_convert_to_int(self, obj : list[dict[str, object]]) -> None:
         batch = QsmrBatch.from_python(obj)
         assert batch.batch
         assert batch.batch[0]["scanid"] == 1234
 
-    def test_convert_all(self, obj):
+    def test_convert_all(self, obj : list[dict[str, object]]) -> None:
         batch = QsmrBatch.from_python(obj)
         assert batch.batch
         assert len(batch.batch) == 2
 
-    def test_batches(self, obj):
+    def test_batches(self, obj : list[dict[str, object]]) -> None:
         batch = QsmrBatch.from_python(obj)
         jobs = batch.make_batch()
         assert len(jobs["stnd1"]) == 1
@@ -30,11 +31,11 @@ class TestBatch:
         assert "target" in jobs["stnd1"][0]
         assert "source" in jobs["stnd1"][0]
 
-    def test_batch_empty(self):
+    def test_batch_empty(self) -> None:
         batch = QsmrBatch(Batch([]))
         assert batch.make_batch() == {}
 
-    def test_batch_url(self):
+    def test_batch_url(self) -> None:
         batch = QsmrBatch.from_python([dict(backend="AC1", freqmode=24, scanid=1001)])
         jobs = batch.make_batch()
         assert jobs["meso24"][0]["source"] == (

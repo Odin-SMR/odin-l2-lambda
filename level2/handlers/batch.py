@@ -1,6 +1,7 @@
-from typing import Any, Dict, List, Literal, NewType, cast
+from typing import Any, Dict, List, Literal, NewType
+
+from pydantic import BaseModel, TypeAdapter
 from typing_extensions import TypedDict
-from pydantic import TypeAdapter
 
 ODIN_API_ROOT = "https://odin-smr.org"
 
@@ -60,6 +61,11 @@ class L2_job(TypedDict):
 Batch = NewType("Batch", List[L2_job])
 
 
+class QSMRJob(BaseModel):
+    source: str
+    target: str
+
+
 class QsmrBatch:
     batch: Batch | None = None
 
@@ -67,7 +73,7 @@ class QsmrBatch:
     def from_python(cls, object: object) -> "QsmrBatch":
         batch_adapter = TypeAdapter(Batch)
         raw_batch = batch_adapter.validate_python(object, strict=False)
-        return cls(cast(Batch, raw_batch))
+        return cls(raw_batch)
 
     def __init__(self, batch: Batch | None):
         self.batch = batch
@@ -95,13 +101,12 @@ class QsmrBatch:
         freqmode: int,
         project: str,
         api_root: str,
-    ):
-        return {
-            "source": f"{api_root}/v5/level1/{freqmode}/{scanid}/Log/",
-            "target": project,
-        }
+    ) -> dict[str, Any]:
+        return QSMRJob(
+            source=f"{api_root}/v5/level1/{freqmode}/{scanid}/Log/", target=project
+        ).model_dump()
 
 
-def handler(event: Dict[str, Any], context: Dict[str, Any]):
+def handler(event: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
     jobs = QsmrBatch.from_python(event["input"])
     return jobs.make_batch()

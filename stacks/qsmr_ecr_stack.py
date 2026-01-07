@@ -1,30 +1,39 @@
-from json import dumps
-import re
-from typing import cast
-from aws_cdk import BundlingOptions, RemovalPolicy, Stack, Duration
-from boto3 import client
-from constructs import Construct
+from typing import Any, cast
+
+from aws_cdk import BundlingOptions, Duration, Environment, RemovalPolicy, Stack
 from aws_cdk import (
-    aws_stepfunctions as sfn,
-    aws_stepfunctions_tasks as sfn_tasks,
-    aws_ecs as ecs,
     aws_ec2 as ec2,
+)
+from aws_cdk import (
     aws_ecr as ecr,
-    aws_ssm as ssm,
+)
+from aws_cdk import (
+    aws_ecs as ecs,
+)
+from aws_cdk import (
     aws_logs as logs,
 )
-from aws_cdk.aws_logs import RetentionDays
-from aws_cdk.aws_lambda import Function, Runtime, Code, IFunction
-from aws_cdk.aws_ssm import StringParameter
-from aws_cdk.aws_sqs import Queue, DeadLetterQueue
+from aws_cdk import (
+    aws_stepfunctions as sfn,
+)
+from aws_cdk import (
+    aws_stepfunctions_tasks as sfn_tasks,
+)
 from aws_cdk.aws_ecs_patterns import QueueProcessingFargateService
+from aws_cdk.aws_lambda import Code, Function, IFunction, Runtime
+from aws_cdk.aws_logs import RetentionDays
+from aws_cdk.aws_sqs import DeadLetterQueue, Queue
+from aws_cdk.aws_ssm import StringParameter
+from constructs import Construct
 
 ODIN_API_KEY_NAME = "/odin-api/worker-key"
 
 
 class EcsStepFunctionStack(Stack):
-    def __init__(self, scope: Construct, **kwargs) -> None:
-        super().__init__(scope, "OdinECRStack", **kwargs)
+    def __init__(
+        self, scope: Construct, env: Environment | dict[str, Any] | None = None
+    ) -> None:
+        super().__init__(scope, "OdinECRStack", env=env)
 
         batch_lambda = Function(
             self,
