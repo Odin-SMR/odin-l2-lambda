@@ -136,3 +136,7 @@ cdk.context.json
 
 # Ruff
 .ruff_cache/
+
+# requirements files
+**/requirements.txt
+
