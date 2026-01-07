@@ -13,17 +13,17 @@ def obj() -> list[dict[str, Any]]:
 
 
 class TestBatch:
-    def test_convert_to_int(self, obj : list[dict[str, object]]) -> None:
+    def test_convert_to_int(self, obj: list[dict[str, object]]) -> None:
         batch = QsmrBatch.from_python(obj)
         assert batch.batch
         assert batch.batch[0]["scanid"] == 1234
 
-    def test_convert_all(self, obj : list[dict[str, object]]) -> None:
+    def test_convert_all(self, obj: list[dict[str, object]]) -> None:
         batch = QsmrBatch.from_python(obj)
         assert batch.batch
         assert len(batch.batch) == 2
 
-    def test_batches(self, obj : list[dict[str, object]]) -> None:
+    def test_batches(self, obj: list[dict[str, object]]) -> None:
         batch = QsmrBatch.from_python(obj)
         jobs = batch.make_batch()
         assert len(jobs["stnd1"]) == 1
