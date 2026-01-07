@@ -1,4 +1,6 @@
 from json import dumps
+import re
+from typing import cast
 from aws_cdk import BundlingOptions, RemovalPolicy, Stack, Duration
 from boto3 import client
 from constructs import Construct
@@ -12,7 +14,7 @@ from aws_cdk import (
     aws_logs as logs,
 )
 from aws_cdk.aws_logs import RetentionDays
-from aws_cdk.aws_lambda import Function, Runtime, Code
+from aws_cdk.aws_lambda import Function, Runtime, Code, IFunction
 from aws_cdk.aws_ssm import StringParameter
 from aws_cdk.aws_sqs import Queue, DeadLetterQueue
 from aws_cdk.aws_ecs_patterns import QueueProcessingFargateService
@@ -27,11 +29,11 @@ class EcsStepFunctionStack(Stack):
         batch_lambda = Function(
             self,
             "BatchLambda",
-            runtime=Runtime.PYTHON_3_11,
+            runtime=Runtime.PYTHON_3_13,
             code=Code.from_asset(
                 "level2",
                 bundling=BundlingOptions(
-                    image=Runtime.PYTHON_3_11.bundling_image,
+                    image=Runtime.PYTHON_3_13.bundling_image,
                     command=[
                         "bash",
                         "-c",
@@ -49,7 +51,7 @@ class EcsStepFunctionStack(Stack):
         batch_invoke = sfn_tasks.LambdaInvoke(
             self,
             "BatchInvoke",
-            lambda_function=batch_lambda,
+            lambda_function=cast(IFunction, batch_lambda),
             input_path="$.l2_job",
             payload=sfn.TaskInput.from_object({"input": sfn.JsonPath.object_at("$")}),
             result_path="$.Batches",
@@ -71,7 +73,7 @@ class EcsStepFunctionStack(Stack):
         parallel_state = sfn.Parallel(self, "RunAllJobs")
 
         repository = ecr.Repository.from_repository_name(self, "QsmrRepository", "qsmr")
-        tags = self.list_ecr_tags(repository.repository_name)
+        tags = self.list_ecr_tags()
         log_group = logs.LogGroup(
             self,
             "QdinQSMRLogGroup",
@@ -161,19 +163,18 @@ class EcsStepFunctionStack(Stack):
             self, "StateMachine", definition=batch_invoke, state_machine_name="OdinQSMR"
         )
 
-    def list_ecr_tags(self, repository_name: str) -> list[str]:
-        ecr_client = client("ecr")
-        tags = []
-
-        paginator = ecr_client.get_paginator("list_images")
-        response_iterator = paginator.paginate(
-            repositoryName=repository_name,
-            filter={"tagStatus": "TAGGED"},
-        )
-
-        for response in response_iterator:
-            for image in response["imageIds"]:
-                if "imageTag" in image:
-                    tags.append(image["imageTag"])
+    def list_ecr_tags(self) -> list[str]:
+        tags = [
+            "meso24",
+            "meso22",
+            "meso21",
+            "meso19",
+            "meso14",
+            "meso13",
+            "stnd17",
+            "stnd8",
+            "stnd2",
+            "stnd1",
+        ]
 
         return tags

@@ -1,8 +1,6 @@
-import json
 from level2.handlers.batch import QsmrBatch, Batch
 import pytest
 
-FAKE_KEY = "01234567890123456789012345678901"
 
 
 @pytest.fixture
@@ -27,7 +25,7 @@ class TestBatch:
 
     def test_batches(self, obj):
         batch = QsmrBatch.from_python(obj)
-        jobs = batch.make_batch(FAKE_KEY)
+        jobs = batch.make_batch()
         assert len(jobs["stnd1"]) == 1
         assert len(jobs["stnd2"]) == 1
         assert "target" in jobs["stnd1"][0]
@@ -35,4 +33,14 @@ class TestBatch:
 
     def test_batch_empty(self):
         batch = QsmrBatch(Batch([]))
-        assert batch.make_batch(FAKE_KEY) == {}
+        assert batch.make_batch() == {}
+
+    def test_batch_url(self):
+        batch = QsmrBatch.from_python(
+            [dict(backend="AC1", freqmode=24, scanid=1001)]
+        )
+        jobs = batch.make_batch()
+        assert jobs["meso24"][0]["source"] == (
+            "https://odin-smr.org/rest_api/v5/level1/24/1001/Log/"
+        )
+        assert jobs["meso24"][0]["target"] == "ALL-Meso-v3.0.0"
