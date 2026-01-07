@@ -130,7 +130,6 @@ dmypy.json
 # AWS
 cdk.out/
 cdk.context.json
-cdk.json
 
 # GIT
 .orig
