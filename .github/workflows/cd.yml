@@ -39,10 +39,10 @@ jobs:
         uses: astral-sh/setup-uv@v7
 
       - name: Generate lambda requirements
-        run: uv export --frozen --only-group lambda --no-editable -o level2/requirements.txt
+        run: uv export --locked --only-group lambda --no-editable -o level2/requirements.txt
 
       - name: sync python cdk dependencies
         run: uv sync --locked --no-dev
 
       - name: Deploy stacks
-        run: uv run cdk deploy --all --require-approval never
+        run: uv run --no-sync cdk deploy --all --require-approval never

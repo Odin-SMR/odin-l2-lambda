@@ -21,13 +21,13 @@ jobs:
         run: uv sync --locked --all-groups
 
       - name: Ruff check
-        run: uv run ruff check .
+        run: uv run --no-sync ruff check .
 
       - name: Black check
-        run: uv run black --check .
+        run: uv run --no-sync black --check .
 
       - name: Mypy check
-        run: uv run mypy .
+        run: uv run --no-sync mypy .
 
       - name: Run tests
-        run: uv run pytest
+        run: uv run --no-sync pytest
