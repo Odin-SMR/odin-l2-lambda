@@ -1,37 +1,48 @@
-from json import dumps
-from aws_cdk import BundlingOptions, RemovalPolicy, Stack, Duration
-from boto3 import client
-from constructs import Construct
+from typing import Any, cast
+
+from aws_cdk import BundlingOptions, Duration, Environment, RemovalPolicy, Stack
 from aws_cdk import (
-    aws_stepfunctions as sfn,
-    aws_stepfunctions_tasks as sfn_tasks,
-    aws_ecs as ecs,
     aws_ec2 as ec2,
+)
+from aws_cdk import (
     aws_ecr as ecr,
-    aws_ssm as ssm,
+)
+from aws_cdk import (
+    aws_ecs as ecs,
+)
+from aws_cdk import (
     aws_logs as logs,
 )
-from aws_cdk.aws_logs import RetentionDays
-from aws_cdk.aws_lambda import Function, Runtime, Code
-from aws_cdk.aws_ssm import StringParameter
-from aws_cdk.aws_sqs import Queue, DeadLetterQueue
+from aws_cdk import (
+    aws_stepfunctions as sfn,
+)
+from aws_cdk import (
+    aws_stepfunctions_tasks as sfn_tasks,
+)
 from aws_cdk.aws_ecs_patterns import QueueProcessingFargateService
+from aws_cdk.aws_lambda import Code, Function, IFunction, Runtime
+from aws_cdk.aws_logs import RetentionDays
+from aws_cdk.aws_sqs import DeadLetterQueue, Queue
+from aws_cdk.aws_ssm import StringParameter
+from constructs import Construct
 
 ODIN_API_KEY_NAME = "/odin-api/worker-key"
 
 
 class EcsStepFunctionStack(Stack):
-    def __init__(self, scope: Construct, **kwargs) -> None:
-        super().__init__(scope, "OdinECRStack", **kwargs)
+    def __init__(
+        self, scope: Construct, env: Environment | dict[str, Any] | None = None
+    ) -> None:
+        super().__init__(scope, "OdinECRStack", env=env)
 
         batch_lambda = Function(
             self,
             "BatchLambda",
-            runtime=Runtime.PYTHON_3_11,
+            runtime=Runtime.PYTHON_3_13,
             code=Code.from_asset(
                 "level2",
                 bundling=BundlingOptions(
-                    image=Runtime.PYTHON_3_11.bundling_image,
+                    image=Runtime.PYTHON_3_13.bundling_image,
                     command=[
                         "bash",
                         "-c",
@@ -49,7 +60,7 @@ class EcsStepFunctionStack(Stack):
         batch_invoke = sfn_tasks.LambdaInvoke(
             self,
             "BatchInvoke",
-            lambda_function=batch_lambda,
+            lambda_function=cast(IFunction, batch_lambda),
             input_path="$.l2_job",
             payload=sfn.TaskInput.from_object({"input": sfn.JsonPath.object_at("$")}),
             result_path="$.Batches",
@@ -71,7 +82,7 @@ class EcsStepFunctionStack(Stack):
         parallel_state = sfn.Parallel(self, "RunAllJobs")
 
         repository = ecr.Repository.from_repository_name(self, "QsmrRepository", "qsmr")
-        tags = self.list_ecr_tags(repository.repository_name)
+        tags = self.list_ecr_tags()
         log_group = logs.LogGroup(
             self,
             "QdinQSMRLogGroup",
@@ -161,19 +172,18 @@ class EcsStepFunctionStack(Stack):
             self, "StateMachine", definition=batch_invoke, state_machine_name="OdinQSMR"
         )
 
-    def list_ecr_tags(self, repository_name: str) -> list[str]:
-        ecr_client = client("ecr")
-        tags = []
-
-        paginator = ecr_client.get_paginator("list_images")
-        response_iterator = paginator.paginate(
-            repositoryName=repository_name,
-            filter={"tagStatus": "TAGGED"},
-        )
-
-        for response in response_iterator:
-            for image in response["imageIds"]:
-                if "imageTag" in image:
-                    tags.append(image["imageTag"])
+    def list_ecr_tags(self) -> list[str]:
+        tags = [
+            "meso24",
+            "meso22",
+            "meso21",
+            "meso19",
+            "meso14",
+            "meso13",
+            "stnd17",
+            "stnd8",
+            "stnd2",
+            "stnd1",
+        ]
 
         return tags
