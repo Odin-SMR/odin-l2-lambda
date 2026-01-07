@@ -1,6 +1,6 @@
 from typing import Any, cast
 
-from aws_cdk import BundlingOptions, Duration, Environment, RemovalPolicy, Stack
+from aws_cdk import BundlingOptions, Duration, RemovalPolicy, Stack
 from aws_cdk import (
     aws_ec2 as ec2,
 )
@@ -30,10 +30,8 @@ ODIN_API_KEY_NAME = "/odin-api/worker-key"
 
 
 class EcsStepFunctionStack(Stack):
-    def __init__(
-        self, scope: Construct, env: Environment | dict[str, Any] | None = None
-    ) -> None:
-        super().__init__(scope, "OdinECRStack", env=env)
+    def __init__(self, scope: Construct, **kwargs: Any) -> None:
+        super().__init__(scope, "OdinECRStack", **kwargs)
 
         batch_lambda = Function(
             self,
