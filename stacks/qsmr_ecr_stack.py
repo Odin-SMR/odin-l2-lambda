@@ -1,22 +1,16 @@
 from typing import Any, cast
 
-from aws_cdk import BundlingOptions, Duration, RemovalPolicy, Stack
 from aws_cdk import (
+    BundlingOptions,
+    Duration,
+    RemovalPolicy,
+    Stack,
     aws_ec2 as ec2,
-)
-from aws_cdk import (
     aws_ecr as ecr,
-)
-from aws_cdk import (
     aws_ecs as ecs,
-)
-from aws_cdk import (
     aws_logs as logs,
-)
-from aws_cdk import (
+    aws_s3 as s3,
     aws_stepfunctions as sfn,
-)
-from aws_cdk import (
     aws_stepfunctions_tasks as sfn_tasks,
 )
 from aws_cdk.aws_ecs_patterns import QueueProcessingFargateService
@@ -81,6 +75,12 @@ class EcsStepFunctionStack(Stack):
 
         repository = ecr.Repository.from_repository_name(self, "QsmrRepository", "qsmr")
         tags = self.list_ecr_tags()
+
+        # Reference to the S3 bucket for writing parquet datasets
+        level2_batch_bucket = s3.Bucket.from_bucket_name(
+            self, "Level2BatchBucket", "odin-level2-batch"
+        )
+
         log_group = logs.LogGroup(
             self,
             "QdinQSMRLogGroup",
@@ -104,7 +104,7 @@ class EcsStepFunctionStack(Stack):
                 queue_name=f"QSMRQueue-{tag}",
             )
 
-            QueueProcessingFargateService(
+            service = QueueProcessingFargateService(
                 self,
                 f"QSMRService{tag}",
                 cluster=cluster,
@@ -128,6 +128,9 @@ class EcsStepFunctionStack(Stack):
                 queue=queue,
                 service_name=f"QSMR-{tag}",
             )
+
+            # Grant write permissions to the S3 bucket for parquet datasets
+            level2_batch_bucket.grant_write(service.task_definition.task_role)
 
             map_state = sfn.Map(
                 self,
