@@ -60,6 +60,8 @@ A Python project (AWS CDK app) for managing and deploying AWS related infrastruc
 	uv run pytest
 	```
 
+> **Tip:** After the initial `uv sync`, you can add the `--no-sync` flag to commands (e.g., `uv run --no-sync pytest`) to skip dependency synchronization and speed up execution.
+
 ### AWS CDK Deployment
 - **Synthesize CDK stacks:**
 	```bash
