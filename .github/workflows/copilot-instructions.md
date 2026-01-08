@@ -8,7 +8,7 @@ Provide a cost-effective and scalable solution for processing Level 2 data using
 
 # Coding guidelines
 
-- Follow codstyle enforced by `black` and `ruff`.
+- Follow code style enforced by `black` and `ruff`.
 - Use type hints and validate with `mypy`.
 - Write unit tests using `pytest`.
 
