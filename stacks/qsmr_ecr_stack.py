@@ -150,7 +150,7 @@ class EcsStepFunctionStack(Stack):
                 result_path="$.SendRequest",
                 output_path="$.SendRequest.request_id",
             )
-            map_state.iterator(send_task)
+            map_state.item_processor(send_task)
             choice = sfn.Choice(
                 self, f"QsmrSplitJob{tag}", state_name=f"Job selector {tag}"
             )
@@ -167,7 +167,10 @@ class EcsStepFunctionStack(Stack):
 
         batch_invoke.next(parallel_state)
         sfn.StateMachine(
-            self, "StateMachine", definition=batch_invoke, state_machine_name="OdinQSMR"
+            self,
+            "StateMachine",
+            definition_body=sfn.DefinitionBody.from_chainable(batch_invoke),
+            state_machine_name="OdinQSMR",
         )
 
     def list_ecr_tags(self) -> list[str]:
