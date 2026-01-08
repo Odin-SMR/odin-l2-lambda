@@ -4,36 +4,76 @@ A Python project (AWS CDK app) for managing and deploying AWS related infrastruc
 
 
 ## Installation
+
+### Prerequisites
+- Python 3.13 or higher
+- Node.js 22 (for AWS CDK)
+- [uv](https://docs.astral.sh/uv/) package manager
+
+### Setup Steps
+
 1. **Clone the repository:**
 	 ```bash
 	 git clone https://github.com/Odin-SMR/odin-l2-workflow.git
 	 cd odin-l2-workflow
 	 ```
-2. **Set up a Python virtual environment:**
+
+2. **Install Node.js 22 (if not already installed):**
 	 ```bash
-        uv sync --all-groups
+	 # Using nvm (recommended)
+	 nvm install 22
+	 nvm use 22
+	 
+	 # Or use the version specified in .nvmrc
+	 nvm use
+	 ```
+
+3. **Install AWS CDK CLI:**
+	 ```bash
+	 npm install -g aws-cdk
+	 ```
+
+4. **Set up Python dependencies:**
+	 ```bash
+	 uv sync --locked --all-groups
 	 ```
 
 ## Usage
-- **Deploy CDK stacks:**
-	```bash
-    cdk synth --profile your-aws-profile
-	cdk deploy --profile your-aws-profile
-	```
 
-- **Run linter:**
+### Development Commands
+- **Run linters:**
     ```bash
+    # Check code formatting with Black
     uv run black --check .
+    
+    # Check code style with Ruff
+    uv run ruff check .
     ```
 
-- **Run mypy type checks:**
+- **Run type checks:**
     ```bash
     uv run mypy .
     ```
+
 - **Run tests:**
 	```bash
 	uv run pytest
 	```
+
+> **Tip:** After the initial `uv sync`, you can add the `--no-sync` flag to commands (e.g., `uv run --no-sync pytest`) to skip dependency synchronization and speed up execution.
+
+### AWS CDK Deployment
+- **Synthesize CDK stacks:**
+	```bash
+	cdk synth --profile your-aws-profile
+	```
+
+- **Deploy CDK stacks:**
+	```bash
+	cdk deploy --profile your-aws-profile
+	```
+
+### Development
 - **Develop Lambda handlers:**
 	Edit or add files in `level2/handlers/`.
 
