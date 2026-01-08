@@ -676,7 +676,7 @@ wheels = [
 ]
 
 [[package]]
-name = "odin-l2-lambda"
+name = "odin-l2-workflow"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
