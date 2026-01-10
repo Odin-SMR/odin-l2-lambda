@@ -130,7 +130,7 @@ class EcsStepFunctionStack(Stack):
             )
 
             # Grant write permissions to the S3 bucket for parquet datasets
-            level2_batch_bucket.grant_write(service.task_definition.task_role)
+            level2_batch_bucket.grant_read_write(service.task_definition.task_role)
 
             map_state = sfn.Map(
                 self,
