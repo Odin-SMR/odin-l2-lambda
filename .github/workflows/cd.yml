@@ -46,3 +46,4 @@ jobs:
 
       - name: Deploy stacks
         run: uv run --no-sync cdk deploy --all --require-approval never
+
