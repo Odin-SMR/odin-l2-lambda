@@ -15,6 +15,8 @@ from aws_cdk.aws_sqs import DeadLetterQueue, Queue
 from aws_cdk.aws_ssm import StringParameter
 from constructs import Construct
 
+from level2.handlers.batch import PROJECT_CONF
+
 ODIN_API_KEY_NAME = "/odin-api/worker-key"
 
 
@@ -172,17 +174,5 @@ class EcsStepFunctionStack(Stack):
         )
 
     def list_ecr_tags(self) -> list[str]:
-        tags = [
-            "meso24",
-            "meso22",
-            "meso21",
-            "meso19",
-            "meso14",
-            "meso13",
-            "stnd17",
-            "stnd8",
-            "stnd2",
-            "stnd1",
-        ]
-
+        tags = [tag[1]["tag"] for tag in PROJECT_CONF.items()]
         return tags
