@@ -3,7 +3,7 @@ name = "odin-l2-workflow"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.13, <3.14"
 dependencies = [
     "aws-cdk-lib>=2.233.0",
     "boto3>=1.42.23",
@@ -11,20 +11,22 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "black[jupyter]>=25.12.0",
     "boto3-stubs[ecr,essential,s3,ssm,stepfunctions]>=1.42.23",
     "ipykernel>=7.1.0",
-    "mypy>=1.19.1",
     "pytest>=9.0.2",
     "ruff>=0.14.10",
+    "ty>=0.0.23",
 ]
 lambda = [
     "pydantic>=2.12.5",
 ]
 
-[tool.mypy]
-exclude = '(^|/)(cdk\.out)(/|$)'
-strict = true
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = ["E203"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
