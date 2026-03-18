@@ -97,8 +97,10 @@ class EcsStepFunctionStack(Stack):
             queue = Queue(
                 self,
                 f"QSMRQueue{tag}",
-                dead_letter_queue=DeadLetterQueue(max_receive_count=3, queue=dlq),
+                dead_letter_queue=DeadLetterQueue(max_receive_count=2, queue=dlq),
                 queue_name=f"QSMRQueue-{tag}",
+                retention_period=Duration.days(14),
+                visibility_timeout=Duration.minutes(15),
             )
 
             service = QueueProcessingFargateService(
