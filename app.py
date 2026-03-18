@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from aws_cdk import App, Environment
+
 from stacks.qsmr_ecr_stack import EcsStepFunctionStack
 
 app = App()

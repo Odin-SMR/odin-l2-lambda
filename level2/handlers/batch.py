@@ -1,53 +1,9 @@
-from typing import Any, Dict, List, Literal, NewType
+from typing import Any, Literal, NewType
 
 from pydantic import BaseModel, TypeAdapter
 from typing_extensions import TypedDict
 
-ODIN_API_ROOT = "https://odin-smr.org"
-
-PROJECT_CONF = {
-    21: {
-        "tag": "meso21",
-        "project": "meso21",
-    },
-    1: {
-        "tag": "stnd1",
-        "project": "ALL-Strat-v3.0.0",
-    },
-    2: {
-        "tag": "stnd2",
-        "project": "ALL-Strat-v3.0.0",
-    },
-    8: {
-        "tag": "stnd8",
-        "project": "ALL-Strat-v3.0.0",
-    },
-    17: {
-        "tag": "stnd17",
-        "project": "ALL-Strat-v3.0.0",
-    },
-    13: {
-        "tag": "meso13",
-        "project": "ALL-Meso-v3.0.0",
-    },
-    14: {
-        "tag": "meso14",
-        "project": "ALL-Meso-v3.0.0",
-    },
-    19: {
-        "tag": "meso19",
-        "project": "ALL-Meso-v3.0.0",
-    },
-    22: {
-        "tag": "meso22",
-        "project": "ALL-Meso-v3.0.0",
-    },
-    24: {
-        "tag": "meso24",
-        "project": "ALL-Meso-v3.0.0",
-    },
-}
-
+from .config import PROJECT_CONF
 
 ODIN_API_ROOT = "https://odin-smr.org/rest_api"
 
@@ -58,7 +14,7 @@ class L2_job(TypedDict):
     scanid: int
 
 
-Batch = NewType("Batch", List[L2_job])
+Batch = NewType("Batch", list[L2_job])
 
 
 class QSMRJob(BaseModel):
@@ -78,8 +34,8 @@ class QsmrBatch:
     def __init__(self, batch: Batch | None):
         self.batch = batch
 
-    def make_batch(self) -> Dict[str, Any]:
-        project_batch: Dict[str, Any] = {}
+    def make_batch(self) -> dict[str, Any]:
+        project_batch: dict[str, Any] = {}
         if self.batch:
             for b in self.batch:
                 config = PROJECT_CONF.get(b["freqmode"], None)
@@ -107,6 +63,6 @@ class QsmrBatch:
         ).model_dump()
 
 
-def handler(event: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
+def handler(event: dict[str, Any], context: dict[str, Any]) -> dict[str, Any]:
     jobs = QsmrBatch.from_python(event["input"])
     return jobs.make_batch()

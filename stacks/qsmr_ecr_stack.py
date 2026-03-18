@@ -1,24 +1,21 @@
 from typing import Any, cast
 
-from aws_cdk import (
-    BundlingOptions,
-    Duration,
-    RemovalPolicy,
-    Stack,
-    aws_ec2 as ec2,
-    aws_ecr as ecr,
-    aws_ecs as ecs,
-    aws_logs as logs,
-    aws_s3 as s3,
-    aws_stepfunctions as sfn,
-    aws_stepfunctions_tasks as sfn_tasks,
-)
+from aws_cdk import BundlingOptions, Duration, RemovalPolicy, Stack
+from aws_cdk import aws_ec2 as ec2
+from aws_cdk import aws_ecr as ecr
+from aws_cdk import aws_ecs as ecs
+from aws_cdk import aws_logs as logs
+from aws_cdk import aws_s3 as s3
+from aws_cdk import aws_stepfunctions as sfn
+from aws_cdk import aws_stepfunctions_tasks as sfn_tasks
 from aws_cdk.aws_ecs_patterns import QueueProcessingFargateService
 from aws_cdk.aws_lambda import Code, Function, IFunction, Runtime
 from aws_cdk.aws_logs import RetentionDays
 from aws_cdk.aws_sqs import DeadLetterQueue, Queue
 from aws_cdk.aws_ssm import StringParameter
 from constructs import Construct
+
+from level2.handlers.config import PROJECT_CONF
 
 ODIN_API_KEY_NAME = "/odin-api/worker-key"
 
@@ -38,7 +35,7 @@ class EcsStepFunctionStack(Stack):
                     command=[
                         "bash",
                         "-c",
-                        "pip install -r requirements.txt -t /asset-output && cp -au . /asset-output",
+                        "pip install -r requirements.txt -t /asset-output && cp -au . /asset-output",  # noqa: E501
                     ],
                 ),
             ),
@@ -100,8 +97,10 @@ class EcsStepFunctionStack(Stack):
             queue = Queue(
                 self,
                 f"QSMRQueue{tag}",
-                dead_letter_queue=DeadLetterQueue(max_receive_count=3, queue=dlq),
+                dead_letter_queue=DeadLetterQueue(max_receive_count=2, queue=dlq),
                 queue_name=f"QSMRQueue-{tag}",
+                retention_period=Duration.days(14),
+                visibility_timeout=Duration.minutes(15),
             )
 
             service = QueueProcessingFargateService(
@@ -127,6 +126,11 @@ class EcsStepFunctionStack(Stack):
                 max_scaling_capacity=10,
                 queue=queue,
                 service_name=f"QSMR-{tag}",
+                environment={
+                    "POWERTOOLS_LOG_LEVEL": "INFO",
+                    "POWERTOOLS_SERVICE_NAME": f"QSMR-{tag}",
+                    "POWERTOOLS_METRICS_NAMESPACE": "QSMR",
+                },
             )
 
             # Grant write permissions to the S3 bucket for parquet datasets
@@ -177,17 +181,5 @@ class EcsStepFunctionStack(Stack):
         )
 
     def list_ecr_tags(self) -> list[str]:
-        tags = [
-            "meso24",
-            "meso22",
-            "meso21",
-            "meso19",
-            "meso14",
-            "meso13",
-            "stnd17",
-            "stnd8",
-            "stnd2",
-            "stnd1",
-        ]
-
+        tags = [conf["tag"] for conf in PROJECT_CONF.values()]
         return tags

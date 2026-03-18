@@ -1,6 +1,8 @@
 from typing import Any
-from level2.handlers.batch import QsmrBatch, Batch
+
 import pytest
+
+from level2.handlers.batch import Batch, QsmrBatch
 
 
 @pytest.fixture
