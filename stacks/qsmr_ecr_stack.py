@@ -126,6 +126,11 @@ class EcsStepFunctionStack(Stack):
                 max_scaling_capacity=10,
                 queue=queue,
                 service_name=f"QSMR-{tag}",
+                environment={
+                    "POWERTOOLS_LOG_LEVEL": "INFO",
+                    "POWERTOOLS_SERVICE_NAME": f"QSMR-{tag}",
+                    "POWERTOOLS_METRICS_NAMESPACE": "QSMR",
+                },
             )
 
             # Grant write permissions to the S3 bucket for parquet datasets
