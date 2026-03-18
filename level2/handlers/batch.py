@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Literal, NewType
+from typing import Any, Literal, NewType
 
 from pydantic import BaseModel, TypeAdapter
 from typing_extensions import TypedDict
@@ -58,7 +58,7 @@ class L2_job(TypedDict):
     scanid: int
 
 
-Batch = NewType("Batch", List[L2_job])
+Batch = NewType("Batch", list[L2_job])
 
 
 class QSMRJob(BaseModel):
@@ -78,8 +78,8 @@ class QsmrBatch:
     def __init__(self, batch: Batch | None):
         self.batch = batch
 
-    def make_batch(self) -> Dict[str, Any]:
-        project_batch: Dict[str, Any] = {}
+    def make_batch(self) -> dict[str, Any]:
+        project_batch: dict[str, Any] = {}
         if self.batch:
             for b in self.batch:
                 config = PROJECT_CONF.get(b["freqmode"], None)
@@ -107,6 +107,6 @@ class QsmrBatch:
         ).model_dump()
 
 
-def handler(event: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
+def handler(event: dict[str, Any], context: dict[str, Any]) -> dict[str, Any]:
     jobs = QsmrBatch.from_python(event["input"])
     return jobs.make_batch()

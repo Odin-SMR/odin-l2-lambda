@@ -1,18 +1,13 @@
 from typing import Any, cast
 
-from aws_cdk import (
-    BundlingOptions,
-    Duration,
-    RemovalPolicy,
-    Stack,
-    aws_ec2 as ec2,
-    aws_ecr as ecr,
-    aws_ecs as ecs,
-    aws_logs as logs,
-    aws_s3 as s3,
-    aws_stepfunctions as sfn,
-    aws_stepfunctions_tasks as sfn_tasks,
-)
+from aws_cdk import BundlingOptions, Duration, RemovalPolicy, Stack
+from aws_cdk import aws_ec2 as ec2
+from aws_cdk import aws_ecr as ecr
+from aws_cdk import aws_ecs as ecs
+from aws_cdk import aws_logs as logs
+from aws_cdk import aws_s3 as s3
+from aws_cdk import aws_stepfunctions as sfn
+from aws_cdk import aws_stepfunctions_tasks as sfn_tasks
 from aws_cdk.aws_ecs_patterns import QueueProcessingFargateService
 from aws_cdk.aws_lambda import Code, Function, IFunction, Runtime
 from aws_cdk.aws_logs import RetentionDays
@@ -38,7 +33,7 @@ class EcsStepFunctionStack(Stack):
                     command=[
                         "bash",
                         "-c",
-                        "pip install -r requirements.txt -t /asset-output && cp -au . /asset-output",
+                        "pip install -r requirements.txt -t /asset-output && cp -au . /asset-output",  # noqa: E501
                     ],
                 ),
             ),
